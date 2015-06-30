@@ -802,8 +802,6 @@ function organizer_fetch_table_entries($slots,$orderby="") {
 		$query .= "ORDER BY " . $orderby;
 	}
 
-
-
 	$params = array_merge($params, $inparams);
 	return $DB->get_records_sql($query, $params);
 }
@@ -811,10 +809,10 @@ function organizer_fetch_table_entries($slots,$orderby="") {
 /**
  * Checks whether an organizer instance supports waiting queues.
  *
- * @param int $organizerid
+ * @param int $organizerid The ID of the organizer instance.
  * @return boolean
  */
-function organizer_has_queue(int $organizerid) {
+function organizer_hasqueue($organizerid) {
 	global $DB;
 
 	$result = false;
@@ -823,3 +821,4 @@ function organizer_has_queue(int $organizerid) {
 	}
 	return $result;
 }
+
