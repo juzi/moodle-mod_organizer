@@ -873,6 +873,6 @@ $string['messages_none'] = 'No registration notifications';
 $string['messages_re_unreg'] = 'Re-registrations and unregistrations only';
 $string['messages_all'] = 'All registration, re-registrations and unregistrations';
 
-$string['reset_organizer_all'] = 'Deleting slots, appointments and related events';
-$string['delete_organizer_grades'] = 'Deleting grades of all organizers';
-$string['timeshift'] = 'Shifting absolute deadline';
+$string['queue'] = 'Waiting queues';
+$string['queue_help'] = 'Waiting queues allow users to register to a time slot even if the maximum number of participants is already reached.
+		Users are added to a waiting queue and assigned to the slot (in order) as soon as a slot becomes available.';

@@ -121,7 +121,7 @@ class mod_organizer_mod_form extends moodleform_mod {
         		get_string('queue', 'organizer'), null, null, array(0, 1));
         $mform->setType('queue', PARAM_INT);
         $mform->addGroup($queue, 'queuegroup', get_string('queue', 'organizer'), null, false);
-        $mform->addHelpButton('hasqueuesgroup', 'queue', 'organizer');
+        $mform->addHelpButton('queuegroup', 'queue', 'organizer');
 
         $pickeroptions = array();
         $pickeroptions[0] = get_string('messages_none', 'organizer');
