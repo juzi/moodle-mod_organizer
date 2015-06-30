@@ -792,13 +792,13 @@ function organizer_fetch_table_entries($slots,$orderby="") {
 	";
 
 
-	if($orderby == " " || $orderby == ""){
+	if ($orderby == " " || $orderby == "") {
 		$query .=     "ORDER BY s.starttime ASC,
         u.lastname ASC,
         u.firstname ASC,
         teacherlastname ASC,
         teacherfirstname ASC";
-	}else{
+	} else {
 		$query .= "ORDER BY " . $orderby;
 	}
 
@@ -806,4 +806,20 @@ function organizer_fetch_table_entries($slots,$orderby="") {
 
 	$params = array_merge($params, $inparams);
 	return $DB->get_records_sql($query, $params);
+}
+
+/**
+ * Checks whether an organizer instance supports waiting queues.
+ *
+ * @param int $organizerid
+ * @return boolean
+ */
+function organizer_has_queue(int $organizerid) {
+	global $DB;
+
+	$result = false;
+	if ($DB->get_field('organizer', 'queue', array('id' => $organizerid))) {
+		$result = true;
+	}
+	return $result;
 }

@@ -118,7 +118,7 @@ function organizer_generate_student_view($params, $instance,&$popups) {
     $output = organizer_generate_tab_row($params, $instance->context);
     $output .= organizer_make_infobox($params, $instance->organizer, $instance->context,$popups);
 
-    if(time() > $instance->organizer->allowregistrationsfromdate ){
+    if (time() > $instance->organizer->allowregistrationsfromdate ) {
 	    $columns = array('datetime', 'location', 'participants', 'teacher', 'status', 'actions');
 	    $align = array('left', 'left', 'left', 'left', 'center', 'center');
 	    $sortable = array('datetime', 'location', 'teacher');
@@ -131,11 +131,10 @@ function organizer_generate_student_view($params, $instance,&$popups) {
 	    $table->align = $align;
 
 	    $output .= organizer_render_table_with_footer($table);
-    }else{
-    	
-    	if($instance->organizer->alwaysshowdescription){
+    } else {
+    	if ($instance->organizer->alwaysshowdescription) {
     		$message = get_string('allowsubmissionsfromdatesummary','organizer',userdate($instance->organizer->allowregistrationsfromdate));
-    	}else{
+    	} else {
     		$message = get_string('allowsubmissionsanddescriptionfromdatesummary','organizer',userdate($instance->organizer->allowregistrationsfromdate));
     	}
     	$output .= html_writer::div($message,'',array('id'=>'intro'));
