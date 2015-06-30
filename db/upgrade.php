@@ -13,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // If not, see <http://www.gnu.org/licenses/>.
-
 /**
  * db/update.php
  *
@@ -25,9 +24,7 @@
  * @copyright     2014 Academic Moodle Cooperation {@link http://www.academic-moodle-cooperation.org}
  * @license       http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
-
 /**
  * xmldb_organizer_upgrade
  *
@@ -35,27 +32,21 @@ defined('MOODLE_INTERNAL') || die();
  * @return bool
  */
 function xmldb_organizer_upgrade($oldversion) {
-
     global $DB;
-
     $dbman = $DB->get_manager();
     
     if ($oldversion < 2012081404) {
-
         // Changing precision of field grade on table organizer to (10, 5)
         $table = new xmldb_table('organizer_slot_appointments');
         $field = new xmldb_field('grade', XMLDB_TYPE_NUMBER, '10, 5', null, null, null, null,
                 'attended');
-
         // Launch change of precision, sign and the default value for field grade
         $dbman->change_field_precision($table, $field);
         $dbman->change_field_unsigned($table, $field);
         $dbman->change_field_default($table, $field);
-
         // organizer savepoint reached
         upgrade_mod_savepoint(true, 2012081404, 'organizer');
     }
-
     if ($oldversion < 2012081401) {
     
         // Changing precision of field grade on table organizer to (10, 5)
@@ -71,23 +62,18 @@ function xmldb_organizer_upgrade($oldversion) {
         // organizer savepoint reached
         upgrade_mod_savepoint(true, 2012081401, 'organizer');
     }
-
     if ($oldversion < 2012081404) {
-
         // Changing precision of field grade on table organizer to (10, 5)
         $table = new xmldb_table('organizer_slot_appointments');
         $field = new xmldb_field('grade', XMLDB_TYPE_NUMBER, '10, 5', null, null, null, null,
                 'attended');
-
         // Launch change of precision, sign and the default value for field grade
         $dbman->change_field_precision($table, $field);
         $dbman->change_field_unsigned($table, $field);
         $dbman->change_field_default($table, $field);
-
         // organizer savepoint reached
         upgrade_mod_savepoint(true, 2012081404, 'organizer');
     }
-
     if ($oldversion < 2012122601) {
         
         // Define index slots_eventid (not unique) to be dropped form organizer_slots
@@ -112,7 +98,6 @@ function xmldb_organizer_upgrade($oldversion) {
     
         // Launch add key organizer
         $dbman->add_key($table, $key);
-
         // Define index slot_appointments_slotid (not unique) to be dropped form organizer_slot_appointments
         $table = new xmldb_table('organizer_slot_appointments');
         $index = new xmldb_index('slot_appointments_slotid', XMLDB_INDEX_NOTUNIQUE, array('slotid'));
@@ -142,7 +127,6 @@ function xmldb_organizer_upgrade($oldversion) {
     
     if ($oldversion < 2013112900) {
 		$table = new xmldb_table('organizer');
-
 		// rename enableuntil field to duedate
 		$field = new xmldb_field('enableuntil', XMLDB_TYPE_INTEGER, '10', false, false, false, '0', 'enablefrom');
 		if ($dbman->field_exists($table, $field)){
@@ -209,26 +193,62 @@ function xmldb_organizer_upgrade($oldversion) {
     
         // Launch change of precision, sign and the default value for field grade
         $dbman->change_field_precision($table, $field);
-
         // organizer savepoint reached
         upgrade_mod_savepoint(true, 2015012004, 'organizer');
     }
     
    if ($oldversion < 2015063000) {
-
         // Define field queue to be added to organizer.
         $table = new xmldb_table('organizer');
         $field = new xmldb_field('queue', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'grade');
-
         // Conditionally launch add field queue.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-
         // Organizer savepoint reached.
         upgrade_mod_savepoint(true, 2015063000, 'organizer');
     }
-    
+	
 
+    if ($oldversion < 2015063001) {
+
+        // Define table organizer_slot_queues to be created.
+        $table = new xmldb_table('organizer_slot_queues');
+
+        // Adding fields to table organizer_slot_queues.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('slotid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('groupid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('applicantid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('attended', XMLDB_TYPE_INTEGER, '4', null, null, null, null);
+        $table->add_field('grade', XMLDB_TYPE_NUMBER, '11, 5', null, null, null, null);
+        $table->add_field('feedback', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('comments', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('eventid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('notified', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('allownewappointments', XMLDB_TYPE_INTEGER, '4', null, null, null, null);
+
+        // Adding keys to table organizer_slot_queues.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('slot', XMLDB_KEY_FOREIGN, array('slotid'), 'organizer_slots', array('id'));
+
+        // Adding indexes to table organizer_slot_queues.
+        $table->add_index('slot_queue_userid', XMLDB_INDEX_NOTUNIQUE, array('userid'));
+        $table->add_index('slot_queue_groupid', XMLDB_INDEX_NOTUNIQUE, array('groupid'));
+        $table->add_index('slot_queue_eventid', XMLDB_INDEX_NOTUNIQUE, array('eventid'));
+
+        // Conditionally launch create table for organizer_slot_queues.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Organizer savepoint reached.
+        upgrade_mod_savepoint(true, 2015063001, 'organizer');
+    }
+	
+	
+	
+    
     return true;
 }
