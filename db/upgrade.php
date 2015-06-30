@@ -213,6 +213,22 @@ function xmldb_organizer_upgrade($oldversion) {
         // organizer savepoint reached
         upgrade_mod_savepoint(true, 2015012004, 'organizer');
     }
+    
+   if ($oldversion < 2015063000) {
+
+        // Define field queue to be added to organizer.
+        $table = new xmldb_table('organizer');
+        $field = new xmldb_field('queue', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'grade');
+
+        // Conditionally launch add field queue.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Organizer savepoint reached.
+        upgrade_mod_savepoint(true, 2015063000, 'organizer');
+    }
+    
 
     return true;
 }
