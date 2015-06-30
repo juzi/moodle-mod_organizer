@@ -208,6 +208,7 @@ $string['title_print'] = 'Druckansicht';
 $string['btn_register'] = 'Anmelden';
 $string['btn_unregister'] = 'Abmelden';
 $string['btn_reregister'] = 'Ummelden';
+$string['btn_queue'] = 'Warteschlange';
 $string['btn_reeval'] = 'Neu bewerten';
 $string['btn_eval_short'] = 'Bewerten';
 $string['btn_remind'] = 'Erinnerung senden';
