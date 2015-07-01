@@ -877,3 +877,5 @@ $string['messages_all'] = 'All registration, re-registrations and unregistration
 $string['queue'] = 'Waiting queues';
 $string['queue_help'] = 'Waiting queues allow users to register to a time slot even if the maximum number of participants is already reached.
 		Users are added to a waiting queue and assigned to the slot (in order) as soon as a slot becomes available.';
+$string['queuesubject'] = 'Moodle Organizer: Promoted from queue';
+$string['queuebody'] = 'Your registration for a timeslot has been promoted from status "waiting list" to status "booked".';
