@@ -694,6 +694,7 @@ function organizer_unregister_appointment($slotid, $groupid) {
     $slotx = new organizer_slot($slot);
  	if (organizer_hasqueue($organizer->id) && $next = $slotx->get_next_in_queue()) {
         $ok ^= organizer_register_appointment($slotid, $next->groupid, $next->userid, true);
+        $ok ^= organizer_delete_from_queue($slotid, $next->userid);
  	}
 
     organizer_add_event_slot($cm->id, $slot); //FIXME!!!
