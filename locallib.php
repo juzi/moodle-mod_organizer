@@ -519,8 +519,8 @@ function organizer_add_to_queue(organizer_slot $slotobj, $groupid = 0, $userid =
     return $ok;
 }
 
-function organizer_register_appointment($slotid, $groupid = 0, $userid = 0) {
-    global $DB, $USER;
+function organizer_register_appointment($slotid, $groupid = 0, $userid = 0, $sendmessage = false) {
+    global $DB, $USER, $CFG;
 
     if (!$userid) {
     	$userid = $USER->id;
@@ -533,15 +533,36 @@ function organizer_register_appointment($slotid, $groupid = 0, $userid = 0) {
     sem_acquire($semaphore);
 
     $ok = true;
+    $recipents = array();
     if (organizer_is_group_mode()) {
         $memberids = $DB->get_fieldset_select('groups_members', 'userid', "groupid = {$groupid}");
 
         foreach ($memberids as $memberid) {
             $ok ^= organizer_register_single_appointment($slotid, $memberid, $userid, $groupid);
+            $recipents[] = $memberid;
         }
     } else {
         $ok ^= organizer_register_single_appointment($slotid, $userid);
+        $recipents[] = $userid;
     }
+    if ($sendmessage) {
+        $mail = get_mailer();
+        $mail->Subject = get_string('queuesubject', 'organizer');
+        $mail->Body = get_string('queuebody', 'organizer');
+        if ($slot->slot->teachervisible) {
+            $teacher = $DB->get_record('user', 'email', array('id' => $slot->slot->teacherid));
+            $mail->From = $teacher->email;
+            $mail->FromName = fullname($teacher);
+        } else {
+            $mail->From = $CFG->noreplyaddress;
+        }
+        foreach ($recipents as $userid) {
+            $address = $DB->get_field('user', 'email', array('id' => $userid));
+            $mail->addAddress($address);
+        }
+        $mail->send();
+    }
+
 
     list($cm, $course, $organizer, $context) = organizer_get_course_module_data();
     $slot = $DB->get_record('organizer_slots', array('id' => $slotid));
@@ -672,7 +693,7 @@ function organizer_unregister_appointment($slotid, $groupid) {
     $slot = $DB->get_record('organizer_slots', array('id' => $slotid));
     $slotx = new organizer_slot($slot);
  	if (organizer_hasqueue($organizer->id) && $next = $slotx->get_next_in_queue()) {
-        $ok ^= organizer_register_appointment($slotid, $next->groupid, $next->userid);
+        $ok ^= organizer_register_appointment($slotid, $next->groupid, $next->userid, true);
  	}
 
     organizer_add_event_slot($cm->id, $slot); //FIXME!!!
