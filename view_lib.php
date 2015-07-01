@@ -1471,7 +1471,7 @@ function organizer_slot_reg_status($organizer, $slot) {
 }
 
 function organizer_student_action($params, $slot) {
-    global $DB, $OUTPUT;
+    global $DB, $OUTPUT, $USER;
 
     $slotx = new organizer_slot($slot);
 
@@ -1512,6 +1512,21 @@ function organizer_student_action($params, $slot) {
     } else {
         $disabled |= $slotfull || !$canregister || $ismyslot;
         $action = $ismyslot ? 'unregister' : 'register';
+    }
+	$isalreadyinqueue = false;
+    if ($organizer->isgrouporganizer) {
+    	$isalreadyinqueue = $slotx->is_group_in_queue($groupid);
+    } else {
+    	$isalreadyinqueue = $slotx->is_user_in_queue($USER->id);
+    }
+
+	$isqueueable = $organizer->queue && !$isalreadyinqueue && !$myslotpending && !$organizerdisabled
+				 && !$slotdisabled && $slotx->organizer_user_has_access() && !$slotx->is_evaluated();
+	 		
+
+    if ($disabled && $action == 'register' && $isqueueable) {
+    	$action = 'queue';
+    	$disabled = false;
     }
 
     if ($ismyslot || organizer_is_my_slot($slotx)) {

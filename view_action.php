@@ -34,6 +34,7 @@
 define('ORGANIZER_ACTION_REGISTER', 'register');
 define('ORGANIZER_ACTION_UNREGISTER', 'unregister');
 define('ORGANIZER_ACTION_REREGISTER', 'reregister');
+define('ORGANIZER_ACTION_QUEUE', 'queue');
 // define('ORGANIZER_ACTION_REMIND', 'remind');
 // define('ORGANIZER_ACTION_REMINDALL', 'remindall');
 define('ORGANIZER_ACTION_COMMENT', 'comment');
@@ -88,7 +89,7 @@ $redirecturl = new moodle_url('/mod/organizer/view.php', array('id' => $cm->id, 
 
 $logurl = 'view_action.php?id=' . $cm->id . '&mode=' . $mode . '&action=' . $action;
 
-if ($action == ORGANIZER_ACTION_REGISTER) {
+if ($action == ORGANIZER_ACTION_REGISTER || $action == ORGANIZER_ACTION_QUEUE) {
     require_capability('mod/organizer:register', $context);
 
     if (!organizer_security_check_slots($slot)) {
@@ -104,13 +105,22 @@ if ($action == ORGANIZER_ACTION_REGISTER) {
     $success = organizer_register_appointment($slot, $groupid);
 
     if ($success) {
-    	$event = \mod_organizer\event\appointment_added::create(array(
-    			'objectid' => $PAGE->cm->id,
-    			'context' => $PAGE->context
-    	));
+    	if ($action == ORGANIZER_ACTION_QUEUE) {
+    		$event = \mod_organizer_event\queue_added::create(array(
+    				'objectid' => $PAGE->cm->id,
+    				'context' => $PAGE->context
+	    	));
+    	} else {
+    		$event = \mod_organizer\event\appointment_added::create(array(
+    				'objectid' => $PAGE->cm->id,
+    				'context' => $PAGE->context
+    		));
+    	}
     	$event->trigger();
     	
-        organizer_prepare_and_send_message($slot, 'register_notify:teacher:register'); // ---------------------------------------- MESSAGE!!!
+    	// TODO send correct notification when queue
+        organizer_prepare_and_send_message($slot, 'register_notify:teacher:register');
+        // ---------------------------------------- MESSAGE!!!
         if ($group) {
             organizer_prepare_and_send_message($slot, 'group_registration_notify:student:register');
         }
@@ -123,6 +133,7 @@ if ($action == ORGANIZER_ACTION_REGISTER) {
     }
 
     redirect($redirecturl);
+
 } else if ($action == ORGANIZER_ACTION_UNREGISTER) {
     require_capability('mod/organizer:unregister', $context);
 
@@ -230,6 +241,8 @@ function organizer_organizer_student_action_allowed($action, $slot) {
     $slotfull = $slotx->is_full();
 
     $disabled = $myslotpending || $organizerdisabled || $slotdisabled || !$slotx->organizer_user_has_access() || $slotx->is_evaluated();
+	$isqueueable = $organizer->queue && !$myslotpending && !$organizerdisabled
+				 && !$slotdisabled && $slotx->organizer_user_has_access() && !$slotx->is_evaluated();
 
     if ($myslotexists) {
         if (!$slotdisabled) {
@@ -247,5 +260,10 @@ function organizer_organizer_student_action_allowed($action, $slot) {
         $allowedaction = $ismyslot ? ORGANIZER_ACTION_UNREGISTER : ORGANIZER_ACTION_REGISTER;
     }
 
-    return !$disabled && ($action == $allowedaction);
+    $result = !$disabled && ($action == $allowedaction);
+    if (!$result && $isqueueable &&  $action == ORGANIZER_ACTION_QUEUE) {
+		$result = true;    	
+    }
+
+    return $result;
 }

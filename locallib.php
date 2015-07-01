@@ -503,26 +503,57 @@ function organizer_delete_appointment_slot($id) {
     return $notified_users;
 }
 
-function organizer_register_appointment($slotid, $groupid = 0) {
+function organizer_add_to_queue(organizer_slot $slotobj, $groupid = 0) {
+	global $DB, $USER;
+
+   	$organizer = $slotobj->get_organizer();
+  	if (!$organizer->queue) {
+       	return false;
+   	} 
+    $slotid = $slotobj->get_slot()->id;
+    
+    $ok = true;
+    if ($organizer->isgrouporganizer && $groupid) {
+        $memberids = $DB->get_fieldset_select('groups_members', 'userid', "groupid = :groupid",
+        		array('groupid' => $groupid));
+
+        foreach ($memberids as $memberid) {
+            $ok ^= organizer_queue_single_appointment($slotid, $memberid, $USER->id, $groupid);
+        }
+    } else {
+        $ok ^= organizer_queue_single_appointment($slotid, $USER->id);
+    }
+
+    // TODO  create new event for queueing 
+	//    list($cm, $course, $organizer, $context) = organizer_get_course_module_data();
+	//    organizer_add_event_slot($cm->id, $slotobj->get_slot());
+
+    return $ok;
+}
+
+function organizer_register_appointment($slotid, $groupid = 0, $userid = 0) {
     global $DB, $USER;
 
-    $semaphore = sem_get($slotid);
-    sem_acquire($semaphore);
-
+    if (!$userid) {
+    	$userid = $USER->id;
+    }
     $slot = new organizer_slot($slotid);
     if ($slot->is_full()) {
-        return false;
+	    print_object(array('register appointment slot full', $slot));
+    	return organizer_add_to_queue($slot, $groupid);
     }
+    $semaphore = sem_get($slotid);
+    sem_acquire($semaphore);
 
     $ok = true;
     if (organizer_is_group_mode()) {
         $memberids = $DB->get_fieldset_select('groups_members', 'userid', "groupid = {$groupid}");
 
         foreach ($memberids as $memberid) {
-            $ok ^= organizer_register_single_appointment($slotid, $memberid, $USER->id, $groupid);
+            $ok ^= organizer_register_single_appointment($slotid, $memberid, $userid, $groupid);
         }
     } else {
-        $ok ^= organizer_register_single_appointment($slotid, $USER->id);
+        $ok ^= organizer_register_single_appointment($slotid, $userid);
     }
 
     list($cm, $course, $organizer, $context) = organizer_get_course_module_data();
@@ -552,6 +583,29 @@ function organizer_register_single_appointment($slotid, $userid, $applicantid = 
     $appointment->eventid = organizer_add_event_appointment($cm->id, $appointment);
 
     $appointment->id = $DB->insert_record('organizer_slot_appointments', $appointment);
+
+    return $appointment->id;
+}
+
+function organizer_queue_single_appointment($slotid, $userid, $applicantid = 0, $groupid = 0) {
+    global $DB;
+
+    list($cm, $course, $organizer, $context) = organizer_get_course_module_data();
+
+    $appointment = new stdClass();
+    $appointment->slotid = $slotid;
+    $appointment->userid = $userid;
+    $appointment->groupid = $groupid;
+    $appointment->applicantid = $applicantid ? $applicantid : $userid;
+    $appointment->notified = 0;
+    $appointment->attended = null;
+    $appointment->grade = null;
+    $appointment->feedback = '';
+    $appointment->comments = '';
+
+    $appointment->eventid = organizer_add_event_appointment($cm->id, $appointment);
+
+    $appointment->id = $DB->insert_record('organizer_slot_queues', $appointment);
 
     return $appointment->id;
 }

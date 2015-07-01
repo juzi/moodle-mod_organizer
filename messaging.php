@@ -200,6 +200,7 @@ function organizer_prepare_and_send_message($data, $type) {
 			}
 			break;
 		case 'register_notify:teacher:register': // TODO: check how it was actually originally defined
+		case 'register_notify:teacher:queue': // TODO: check how it was actually originally defined
 			$slot = $DB->get_record('organizer_slots', array('id' => $data));
 			$organizer = $DB->get_record('organizer', array('id' => $slot->organizerid));
 			if ($organizer->emailteachers == ORGANIZER_MESSAGES_ALL) {
@@ -215,6 +216,7 @@ function organizer_prepare_and_send_message($data, $type) {
 			}
 			break;
 		case 'group_registration_notify:student:register':
+		case 'group_registration_notify:student:queue':			
 		case 'group_registration_notify:student:reregister':
 		case 'group_registration_notify:student:unregister':
 			$slot = $DB->get_record('organizer_slots', array('id' => $data));

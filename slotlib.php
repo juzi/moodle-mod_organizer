@@ -168,6 +168,15 @@ class organizer_slot {
         }
     }
 
+    public function get_organizer() {
+    	$this->load_organizer();
+    	return $this->organizer;
+    }
+    
+    public function get_slot() {
+    	return $this->slot;
+    }
+
     public function has_participants() {
         $this->load_appointments();
         return count($this->apps) != 0;
@@ -268,6 +277,32 @@ class organizer_slot {
 					$position++;
 					if ($entry->userid == $userid) {
 						$result = $position;
+						break;
+					}
+				}
+			}
+		}
+		return $result; 
+    }
+
+    /**
+     * Returns the position of a given user in this slot's queue starting at 1.
+     * Returns 0 if the user is not in the queue.
+     *
+     * @param int $userid The ID of the user.
+     */
+    public function is_group_in_queue($groupid) {
+		$result = false;
+
+		$this->load_organizer();
+		// The organizer should exists. Otherwise we are in a pathological state.
+		if ($this->organizer->queue) {
+			$this->load_queue();
+			// The queue might be empty though.
+			if ($this->queue) {
+				foreach ($this->queue as $entry) {
+					if ($entry->groupid == $groupid) {
+						$result = true;
 						break;
 					}
 				}
