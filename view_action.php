@@ -106,20 +106,20 @@ if ($action == ORGANIZER_ACTION_REGISTER || $action == ORGANIZER_ACTION_QUEUE) {
     $success = organizer_register_appointment($slot, $groupid);
 
     if ($success) {
-    	if ($action == ORGANIZER_ACTION_QUEUE) {
-    		$event = \mod_organizer\event\queue_added::create(array(
-    				'objectid' => $PAGE->cm->id,
-    				'context' => $PAGE->context
-	    	));
-    	} else {
-    		$event = \mod_organizer\event\appointment_added::create(array(
-    				'objectid' => $PAGE->cm->id,
-    				'context' => $PAGE->context
-    		));
-    	}
-    	$event->trigger();
-    	
-    	// TODO send correct notification when queue
+        if ($action == ORGANIZER_ACTION_QUEUE) {
+            $event = \mod_organizer\event\queue_added::create(array(
+                    'objectid' => $PAGE->cm->id,
+                    'context' => $PAGE->context
+            ));
+        } else {
+            $event = \mod_organizer\event\appointment_added::create(array(
+                    'objectid' => $PAGE->cm->id,
+                    'context' => $PAGE->context
+            ));
+        }
+        $event->trigger();
+        
+        // TODO send correct notification when queue
         organizer_prepare_and_send_message($slot, 'register_notify:teacher:register');
         // ---------------------------------------- MESSAGE!!!
         if ($group) {
@@ -139,8 +139,8 @@ if ($action == ORGANIZER_ACTION_REGISTER || $action == ORGANIZER_ACTION_QUEUE) {
     require_capability('mod/organizer:unregister', $context);
 
     $event = \mod_organizer\event\appointment_removed::create(array(
-    		'objectid' => $PAGE->cm->id,
-    		'context' => $PAGE->context
+            'objectid' => $PAGE->cm->id,
+            'context' => $PAGE->context
     ));
     $event->trigger();
 
@@ -180,18 +180,18 @@ if ($action == ORGANIZER_ACTION_REGISTER || $action == ORGANIZER_ACTION_QUEUE) {
     $success = organizer_reregister_appointment($slot, $groupid);
 
     if ($success) {
-    	$event = \mod_organizer\event\appointment_removed::create(array(
-    			'objectid' => $PAGE->cm->id,
-    			'context' => $PAGE->context
-    	));
-    	$event->trigger();
-    	
-    	$event = \mod_organizer\event\appointment_added::create(array(
-    			'objectid' => $PAGE->cm->id,
-    			'context' => $PAGE->context
-    	));
-    	$event->trigger();
-    	
+        $event = \mod_organizer\event\appointment_removed::create(array(
+                'objectid' => $PAGE->cm->id,
+                'context' => $PAGE->context
+        ));
+        $event->trigger();
+        
+        $event = \mod_organizer\event\appointment_added::create(array(
+                'objectid' => $PAGE->cm->id,
+                'context' => $PAGE->context
+        ));
+        $event->trigger();
+        
         organizer_prepare_and_send_message($slot, 'register_notify:teacher:reregister');
         if ($group) {
             organizer_prepare_and_send_message($slot, 'group_registration_notify:student:reregister');
@@ -242,8 +242,8 @@ function organizer_organizer_student_action_allowed($action, $slot) {
     $slotfull = $slotx->is_full();
 
     $disabled = $myslotpending || $organizerdisabled || $slotdisabled || !$slotx->organizer_user_has_access() || $slotx->is_evaluated();
-	$isqueueable = $organizer->queue && !$myslotpending && !$organizerdisabled
-				 && !$slotdisabled && $slotx->organizer_user_has_access() && !$slotx->is_evaluated();
+    $isqueueable = $organizer->queue && !$myslotpending && !$organizerdisabled
+                 && !$slotdisabled && $slotx->organizer_user_has_access() && !$slotx->is_evaluated();
 
     if ($myslotexists) {
         if (!$slotdisabled) {
@@ -263,7 +263,7 @@ function organizer_organizer_student_action_allowed($action, $slot) {
 
     $result = !$disabled && ($action == $allowedaction);
     if (!$result && $isqueueable &&  $action == ORGANIZER_ACTION_QUEUE) {
-		$result = true;    	
+        $result = true;     
     }
 
     return $result;

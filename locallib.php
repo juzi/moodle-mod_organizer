@@ -118,7 +118,7 @@ function organizer_add_appointment_slots($data) {
         $dstoffset = 0;
 
         foreach($transitions as $trans){
-        	$dstoffset += $trans['isdst'] ? ($trans['offset']) : (+$trans['offset']);
+            $dstoffset += $trans['isdst'] ? ($trans['offset']) : (+$trans['offset']);
         }
 
         $newslot = new stdClass();
@@ -141,16 +141,16 @@ function organizer_add_appointment_slots($data) {
         }
 
         for ($time = $slot['from']; $time + $data->duration <= $slot['to']; $time += $data->duration) {
-        	$t = new DateTime();
-        	$t->setTimestamp($slot['date']); // sets the day
+            $t = new DateTime();
+            $t->setTimestamp($slot['date']); // sets the day
 
-        	$h = $time / 3600 % 24;
-        	$m = $time / 60 % 60;
-        	$s = $time % 60;
+            $h = $time / 3600 % 24;
+            $m = $time / 60 % 60;
+            $s = $time % 60;
 
-        	$t->setTime($h, $m, $s); // set time of day
+            $t->setTime($h, $m, $s); // set time of day
 
-        	$newslot->starttime = $t->getTimestamp();
+            $newslot->starttime = $t->getTimestamp();
 
             $newslot->id = $DB->insert_record('organizer_slots', $newslot);
 
@@ -233,7 +233,7 @@ function organizer_add_event_slot($cmid, $slot) {
     $event->name = get_string('eventtitle', 'organizer', $a);
     $event->description = get_string('eventtemplate', 'organizer', $a);
     if($slot->comments != ""){
-    	$event->description .= get_string('eventtemplatecomment','organizer',$slot->comments);
+        $event->description .= get_string('eventtemplatecomment','organizer',$slot->comments);
     }
     $event->format = 1;
     $event->courseid = 0;
@@ -382,11 +382,11 @@ function organizer_update_appointment_slot($data) {
     }
 
     if ($data->mod_availablefrom == 1) {
-    	if(is_array($data->availablefrom)){
-    		$slot->availablefrom = 0;
-    	}else{
-    		$slot->availablefrom = $data->availablefrom;
-    	}
+        if(is_array($data->availablefrom)){
+            $slot->availablefrom = 0;
+        }else{
+            $slot->availablefrom = $data->availablefrom;
+        }
         $modified = true;
     }
 
@@ -470,36 +470,36 @@ function organizer_security_check_apps($apps) {
 function organizer_delete_from_queue($slotid, $userid, $groupid = null) {
     global $DB;
 
- 	if($groupid) {
-		if (!$DB->get_record('organizer_slot_queues', array('slotid' => $slotid, 'groupid' => $groupid))) {
-			return false;
-		} else {
-		    $deleted = $DB->delete_records('organizer_slot_queues', array('slotid' => $slotid, 'groupid' => $groupid));
-		}
+    if($groupid) {
+        if (!$DB->get_record('organizer_slot_queues', array('slotid' => $slotid, 'groupid' => $groupid))) {
+            return false;
+        } else {
+            $deleted = $DB->delete_records('organizer_slot_queues', array('slotid' => $slotid, 'groupid' => $groupid));
+        }
     } else {
-		if (!$DB->get_record('organizer_slot_queues', array('slotid' => $slotid, 'userid' => $userid))) { 
-			return false;
-		} else {
-			$deleted = $DB->delete_records('organizer_slot_queues', array('slotid' => $slotid, 'userid' => $userid));
-		}
-	}
+        if (!$DB->get_record('organizer_slot_queues', array('slotid' => $slotid, 'userid' => $userid))) { 
+            return false;
+        } else {
+            $deleted = $DB->delete_records('organizer_slot_queues', array('slotid' => $slotid, 'userid' => $userid));
+        }
+    }
 
     return $deleted;
 }
 
 function organizer_add_to_queue(organizer_slot $slotobj, $groupid = 0) {
-	global $DB, $USER;
+    global $DB, $USER;
 
-   	$organizer = $slotobj->get_organizer();
-  	if (!$organizer->queue) {
-       	return false;
-   	} 
+    $organizer = $slotobj->get_organizer();
+    if (!$organizer->queue) {
+        return false;
+    } 
     $slotid = $slotobj->get_slot()->id;
     
     $ok = true;
     if ($organizer->isgrouporganizer && $groupid) {
         $memberids = $DB->get_fieldset_select('groups_members', 'userid', "groupid = :groupid",
-        		array('groupid' => $groupid));
+                array('groupid' => $groupid));
 
         foreach ($memberids as $memberid) {
             $ok ^= organizer_queue_single_appointment($slotid, $memberid, $USER->id, $groupid);
@@ -509,8 +509,8 @@ function organizer_add_to_queue(organizer_slot $slotobj, $groupid = 0) {
     }
 
     // TODO  create new event for queueing 
-	//    list($cm, $course, $organizer, $context) = organizer_get_course_module_data();
-	//    organizer_add_event_slot($cm->id, $slotobj->get_slot());
+    //    list($cm, $course, $organizer, $context) = organizer_get_course_module_data();
+    //    organizer_add_event_slot($cm->id, $slotobj->get_slot());
 
     return $ok;
 }
@@ -519,12 +519,12 @@ function organizer_register_appointment($slotid, $groupid = 0, $userid = 0) {
     global $DB, $USER;
 
     if (!$userid) {
-    	$userid = $USER->id;
+        $userid = $USER->id;
     }
     $slot = new organizer_slot($slotid);
     if ($slot->is_full()) {
-	    print_object(array('register appointment slot full', $slot));
-    	return organizer_add_to_queue($slot, $groupid);
+        print_object(array('register appointment slot full', $slot));
+        return organizer_add_to_queue($slot, $groupid);
     }
     $semaphore = sem_get($slotid);
     sem_acquire($semaphore);
@@ -608,7 +608,7 @@ function organizer_reregister_appointment($slotid, $groupid = 0) {
     $app = organizer_get_last_user_appointment($slot->organizerid, $memberid);
     $ok = organizer_register_appointment($slotid, $groupid);
     if (isset($app)) {
-    	$ok ^= organizer_unregister_appointment($app->slotid, $groupid);
+        $ok ^= organizer_unregister_appointment($app->slotid, $groupid);
     }
     /**
     if (organizer_is_group_mode()) {
@@ -668,9 +668,9 @@ function organizer_unregister_appointment($slotid, $groupid) {
     }
     $slot = $DB->get_record('organizer_slots', array('id' => $slotid));
     $slotx = new organizer_slot($slot);
- 	if (organizer_hasqueue($organizer->id) && $next = $slotx->get_next_in_queue()) {
+    if (organizer_hasqueue($organizer->id) && $next = $slotx->get_next_in_queue()) {
         $ok ^= organizer_register_appointment($slotid, $next->groupid, $next->userid);
- 	}
+    }
 
     organizer_add_event_slot($cm->id, $slot); //FIXME!!!
 
@@ -683,23 +683,23 @@ function organizer_unregister_single_appointment($slotid, $userid) {
     $slotx = new organizer_slot($slotid);
     $queued = false;
     if ($slotx->is_user_in_queue($userid)) {
-    	$queued = true;
-    	$table = 'organizer_slot_queues';
+        $queued = true;
+        $table = 'organizer_slot_queues';
     } else {
-    	$queued = false;
-    	$table = 'organizer_slot_appointments';
+        $queued = false;
+        $table = 'organizer_slot_appointments';
     }
     $app = $DB->get_record($table, array('userid' => $userid, 'slotid' => $slotid));
 
-	// TODO: remove the participant from the list on the other event
-	$DB->delete_records('event', array('id' => $app->eventid));
+    // TODO: remove the participant from the list on the other event
+    $DB->delete_records('event', array('id' => $app->eventid));
 
-	if (!$queued && isset($app->attended)) {
-	    return true;
-	} else {
-	    $DB->delete_records('event', array('id' => $app->eventid));
-	    return $DB->delete_records($table, array('id' => $app->id));
-	}
+    if (!$queued && isset($app->attended)) {
+        return true;
+    } else {
+        $DB->delete_records('event', array('id' => $app->eventid));
+        return $DB->delete_records($table, array('id' => $app->id));
+    }
 }
 
 function organizer_evaluate_slots($data) {
@@ -802,65 +802,65 @@ function organizer_fetch_my_group() {
 
     $params = array('groupingid' => $cm->groupingid, 'userid' => $USER->id);
     $query = "SELECT {groups}.* FROM {groups}
-        		INNER JOIN {groupings_groups} ON {groups}.id = {groupings_groups}.groupid
-        		INNER JOIN {groups_members} ON {groups}.id = {groups_members}.groupid
-        		WHERE {groupings_groups}.groupingid = :groupingid
-        		AND {groups_members}.userid = :userid
-        		ORDER BY {groups}.name ASC";
+                INNER JOIN {groupings_groups} ON {groups}.id = {groupings_groups}.groupid
+                INNER JOIN {groups_members} ON {groups}.id = {groups_members}.groupid
+                WHERE {groupings_groups}.groupingid = :groupingid
+                AND {groups_members}.userid = :userid
+                ORDER BY {groups}.name ASC";
     $group = $DB->get_record_sql($query, $params);
     return $group;
 }
 
 function organizer_fetch_table_entries($slots,$orderby="") {
-	global $DB;
+    global $DB;
 
-	list($insql, $inparams) = $DB->get_in_or_equal($slots, SQL_PARAMS_NAMED);
+    list($insql, $inparams) = $DB->get_in_or_equal($slots, SQL_PARAMS_NAMED);
 
-	$params = array();
-	$query = "SELECT CONCAT(s.id, COALESCE(a.id, 0)) AS mainid,
-	s.id AS slotid,
-	a.id,
-	a.attended,
-	a.grade,
-	a.feedback,
-	a.comments,
-	s.starttime,
-	s.duration,
-	s.location,
-	s.comments AS teachercomments,
-	u.firstname,
-	u.lastname,
-	u.idnumber,
-	u2.firstname AS teacherfirstname,
-	u2.lastname AS teacherlastname,
-	g.name AS groupname,
-	CASE (SELECT COUNT(a2.slotid) FROM {organizer_slot_appointments} a2 WHERE a2.slotid = a.slotid)
-	WHEN 0 THEN 1
-	ELSE (SELECT COUNT(a2.slotid) FROM {organizer_slot_appointments} a2 WHERE a2.slotid = a.slotid)
-	END AS rowspan
+    $params = array();
+    $query = "SELECT CONCAT(s.id, COALESCE(a.id, 0)) AS mainid,
+    s.id AS slotid,
+    a.id,
+    a.attended,
+    a.grade,
+    a.feedback,
+    a.comments,
+    s.starttime,
+    s.duration,
+    s.location,
+    s.comments AS teachercomments,
+    u.firstname,
+    u.lastname,
+    u.idnumber,
+    u2.firstname AS teacherfirstname,
+    u2.lastname AS teacherlastname,
+    g.name AS groupname,
+    CASE (SELECT COUNT(a2.slotid) FROM {organizer_slot_appointments} a2 WHERE a2.slotid = a.slotid)
+    WHEN 0 THEN 1
+    ELSE (SELECT COUNT(a2.slotid) FROM {organizer_slot_appointments} a2 WHERE a2.slotid = a.slotid)
+    END AS rowspan
 
-	FROM {organizer_slots} s
-	LEFT JOIN {organizer_slot_appointments} a ON a.slotid = s.id
-	LEFT JOIN {user} u ON a.userid = u.id
-	LEFT JOIN {user} u2 ON s.teacherid = u2.id
-	LEFT JOIN {groups} g ON a.groupid = g.id
+    FROM {organizer_slots} s
+    LEFT JOIN {organizer_slot_appointments} a ON a.slotid = s.id
+    LEFT JOIN {user} u ON a.userid = u.id
+    LEFT JOIN {user} u2 ON s.teacherid = u2.id
+    LEFT JOIN {groups} g ON a.groupid = g.id
 
-	WHERE s.id $insql
-	";
+    WHERE s.id $insql
+    ";
 
 
-	if ($orderby == " " || $orderby == "") {
-		$query .=     "ORDER BY s.starttime ASC,
+    if ($orderby == " " || $orderby == "") {
+        $query .=     "ORDER BY s.starttime ASC,
         u.lastname ASC,
         u.firstname ASC,
         teacherlastname ASC,
         teacherfirstname ASC";
-	} else {
-		$query .= "ORDER BY " . $orderby;
-	}
+    } else {
+        $query .= "ORDER BY " . $orderby;
+    }
 
-	$params = array_merge($params, $inparams);
-	return $DB->get_records_sql($query, $params);
+    $params = array_merge($params, $inparams);
+    return $DB->get_records_sql($query, $params);
 }
 
 /**
@@ -870,12 +870,12 @@ function organizer_fetch_table_entries($slots,$orderby="") {
  * @return boolean
  */
 function organizer_hasqueue($organizerid) {
-	global $DB;
+    global $DB;
 
-	$result = false;
-	if ($DB->get_field('organizer', 'queue', array('id' => $organizerid))) {
-		$result = true;
-	}
-	return $result;
+    $result = false;
+    if ($DB->get_field('organizer', 'queue', array('id' => $organizerid))) {
+        $result = true;
+    }
+    return $result;
 }
 
