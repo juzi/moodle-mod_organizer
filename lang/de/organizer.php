@@ -836,3 +836,6 @@ $string['messages_all'] = 'Alle Anmeldungen und Ab-/Ummeldungen';
 $string['reset_organizer_all'] = 'Löschen aller Slots, Anmeldungen und zugehörigen Kalendereinträge';
 $string['delete_organizer_grades'] = 'Löschen aller Bewertungen';
 $string['timeshift'] = 'Verschiebung endgültiger Deadline';
+$string['queuesubject'] = 'Moodle-Terminplaner: Aus Warteliste nachgerückt';
+$string['queuebody'] = 'Ihre sich bisher in der Warteliste befindliche Anmeldung wurde soeben einem freigewordenen Termin zugeordnet.';
+
