@@ -477,7 +477,7 @@ function organizer_delete_from_queue($slotid, $userid, $groupid = null) {
 		    $deleted = $DB->delete_records('organizer_slot_queues', array('slotid' => $slotid, 'groupid' => $groupid));
 		}
     } else {
-		if (!$DB->get_record('organizer_slot_queues', array('slotid' => $slotid, 'userid' => $userid))) { 
+		if (!$DB->get_record('organizer_slot_queues', array('slotid' => $slotid, 'userid' => $userid))) {
 			return false;
 		} else {
 			$deleted = $DB->delete_records('organizer_slot_queues', array('slotid' => $slotid, 'userid' => $userid));
@@ -487,28 +487,32 @@ function organizer_delete_from_queue($slotid, $userid, $groupid = null) {
     return $deleted;
 }
 
-function organizer_add_to_queue(organizer_slot $slotobj, $groupid = 0) {
+function organizer_add_to_queue(organizer_slot $slotobj, $groupid = 0, $userid = 0) {
 	global $DB, $USER;
+
+	if (!$userid) {
+		$userid = $USER->id;
+	}
 
    	$organizer = $slotobj->get_organizer();
   	if (!$organizer->queue) {
        	return false;
-   	} 
+   	}
     $slotid = $slotobj->get_slot()->id;
-    
+
     $ok = true;
     if ($organizer->isgrouporganizer && $groupid) {
         $memberids = $DB->get_fieldset_select('groups_members', 'userid', "groupid = :groupid",
         		array('groupid' => $groupid));
 
         foreach ($memberids as $memberid) {
-            $ok ^= organizer_queue_single_appointment($slotid, $memberid, $USER->id, $groupid);
+            $ok ^= organizer_queue_single_appointment($slotid, $memberid, $userid, $groupid);
         }
     } else {
-        $ok ^= organizer_queue_single_appointment($slotid, $USER->id);
+        $ok ^= organizer_queue_single_appointment($slotid, $userid);
     }
 
-    // TODO  create new event for queueing 
+    // TODO  create new event for queueing
 	//    list($cm, $course, $organizer, $context) = organizer_get_course_module_data();
 	//    organizer_add_event_slot($cm->id, $slotobj->get_slot());
 
@@ -523,8 +527,7 @@ function organizer_register_appointment($slotid, $groupid = 0, $userid = 0) {
     }
     $slot = new organizer_slot($slotid);
     if ($slot->is_full()) {
-	    print_object(array('register appointment slot full', $slot));
-    	return organizer_add_to_queue($slot, $groupid);
+    	return organizer_add_to_queue($slot, $groupid, $userid);
     }
     $semaphore = sem_get($slotid);
     sem_acquire($semaphore);
