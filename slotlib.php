@@ -265,7 +265,7 @@ class organizer_slot {
      */
     public function is_user_in_queue($userid) {
 		$result = 0;
-
+		$this->queue = null;
 		$this->load_organizer();
 		// The organizer should exists. Otherwise we are in a pathological state.
 		if ($this->organizer->queue) {

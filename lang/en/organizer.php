@@ -218,6 +218,7 @@ $string['btn_register'] = 'Register';
 $string['btn_unregister'] = 'Unregister';
 $string['btn_reregister'] = 'Re-register';
 $string['btn_queue'] = 'Queue';
+$string['btn_unqueue'] = 'Remove from Queue';
 $string['btn_reeval'] = 'Re-evaluate';
 $string['btn_eval_short'] = 'Grade';
 $string['btn_remind'] = 'Send reminder';

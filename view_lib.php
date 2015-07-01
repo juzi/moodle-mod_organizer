@@ -1524,11 +1524,15 @@ function organizer_student_action($params, $slot) {
 				 && !$slotdisabled && $slotx->organizer_user_has_access() && !$slotx->is_evaluated();
 	 		
 
-    if ($disabled && $action == 'register' && $isqueueable) {
+    if ($disabled && $action == 'register' && $isqueueable && !$isalreadyinqueue) {
     	$action = 'queue';
     	$disabled = false;
     }
-
+    
+    if ($disabled && $isalreadyinqueue ) {
+    	$action = 'unqueue';
+    	$disabled = false;
+    }
     if ($ismyslot || organizer_is_my_slot($slotx)) {
     	$comment_url = new moodle_url('/mod/organizer/comment_edit.php',
     			array('id' => $params['id'], 'slot' => $slotx->id));
@@ -1542,7 +1546,7 @@ function organizer_student_action($params, $slot) {
         return organizer_get_reg_button($action, $slotx->id, $params, $disabled) . '<br/>'
         		. $comment_btn;
     } else {
-        return organizer_get_reg_button($action, $slotx->id, $params, $disabled);
+        	return organizer_get_reg_button($action, $slotx->id, $params, $disabled);
     }
 }
 

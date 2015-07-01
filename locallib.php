@@ -523,7 +523,6 @@ function organizer_register_appointment($slotid, $groupid = 0, $userid = 0) {
     }
     $slot = new organizer_slot($slotid);
     if ($slot->is_full()) {
-        print_object(array('register appointment slot full', $slot));
         return organizer_add_to_queue($slot, $groupid);
     }
     $semaphore = sem_get($slotid);
@@ -668,7 +667,7 @@ function organizer_unregister_appointment($slotid, $groupid) {
     }
     $slot = $DB->get_record('organizer_slots', array('id' => $slotid));
     $slotx = new organizer_slot($slot);
-    if (organizer_hasqueue($organizer->id) && $next = $slotx->get_next_in_queue()) {
+    if ($organizer->queue && $next = $slotx->get_next_in_queue()) {
         $ok ^= organizer_register_appointment($slotid, $next->groupid, $next->userid);
     }
 

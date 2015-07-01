@@ -35,6 +35,7 @@ define('ORGANIZER_ACTION_REGISTER', 'register');
 define('ORGANIZER_ACTION_UNREGISTER', 'unregister');
 define('ORGANIZER_ACTION_REREGISTER', 'reregister');
 define('ORGANIZER_ACTION_QUEUE', 'queue');
+define('ORGANIZER_ACTION_UNQUEUE', 'unqueue');
 // define('ORGANIZER_ACTION_REMIND', 'remind');
 // define('ORGANIZER_ACTION_REMINDALL', 'remindall');
 define('ORGANIZER_ACTION_COMMENT', 'comment');
@@ -135,7 +136,7 @@ if ($action == ORGANIZER_ACTION_REGISTER || $action == ORGANIZER_ACTION_QUEUE) {
 
     redirect($redirecturl);
 
-} else if ($action == ORGANIZER_ACTION_UNREGISTER) {
+} else if ($action == ORGANIZER_ACTION_UNREGISTER || $action == ORGANIZER_ACTION_UNQUEUE) {
     require_capability('mod/organizer:unregister', $context);
 
     $event = \mod_organizer\event\appointment_removed::create(array(
@@ -212,7 +213,7 @@ if ($action == ORGANIZER_ACTION_REGISTER || $action == ORGANIZER_ACTION_QUEUE) {
 die;
 
 function organizer_organizer_student_action_allowed($action, $slot) {
-    global $DB;
+    global $DB, $USER;
 
     if (!$DB->record_exists('organizer_slots', array('id' => $slot))) {
         return false;
@@ -242,7 +243,15 @@ function organizer_organizer_student_action_allowed($action, $slot) {
     $slotfull = $slotx->is_full();
 
     $disabled = $myslotpending || $organizerdisabled || $slotdisabled || !$slotx->organizer_user_has_access() || $slotx->is_evaluated();
-    $isqueueable = $organizer->queue && !$myslotpending && !$organizerdisabled
+    
+	$isalreadyinqueue = false;
+    if ($organizer->isgrouporganizer) {
+    	$isalreadyinqueue = $slotx->is_group_in_queue($groupid);
+    } else {
+    	$isalreadyinqueue = $slotx->is_user_in_queue($USER->id);
+    }
+
+    $isqueueable = $organizer->queue && !$isalreadyinqueue && !$myslotpending && !$organizerdisabled
                  && !$slotdisabled && $slotx->organizer_user_has_access() && !$slotx->is_evaluated();
 
     if ($myslotexists) {
@@ -264,6 +273,9 @@ function organizer_organizer_student_action_allowed($action, $slot) {
     $result = !$disabled && ($action == $allowedaction);
     if (!$result && $isqueueable &&  $action == ORGANIZER_ACTION_QUEUE) {
         $result = true;     
+    }
+    if (!$result && $isalreadyinqueue && $action == ORGANIZER_ACTION_UNQUEUE) {
+    	$result = true;
     }
 
     return $result;
