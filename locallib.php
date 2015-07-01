@@ -467,40 +467,24 @@ function organizer_security_check_apps($apps) {
     return count($apps) == count($records);
 }
 
-function organizer_delete_appointment_slot($id) {
-    global $DB, $USER;
+function organizer_delete_from_queue($slotid, $userid, $groupid = null) {
+    global $DB;
 
-    if (!$DB->get_record('organizer_slots', array('id' => $id))) {
-        return false;
-    }
+ 	if($groupid) {
+		if (!$DB->get_record('organizer_slot_queues', array('slotid' => $slotid, 'groupid' => $groupid))) {
+			return false;
+		} else {
+		    $deleted = $DB->delete_records('organizer_slot_queues', array('slotid' => $slotid, 'groupid' => $groupid));
+		}
+    } else {
+		if (!$DB->get_record('organizer_slot_queues', array('slotid' => $slotid, 'userid' => $userid))) { 
+			return false;
+		} else {
+			$deleted = $DB->delete_records('organizer_slot_queues', array('slotid' => $slotid, 'userid' => $userid));
+		}
+	}
 
-    $eventid = $DB->get_field('organizer_slots', 'eventid', array('id' => $id));
-
-    // if student is registered to this slot, send a message
-    $appointments = $DB->get_records('organizer_slot_appointments',array('slotid'=>$id));
-    
-    $notified_users = 0;
-    
-    if(count($appointments)>0){
-    	// someone was allready registered to this slot
-
-	    $slot = new organizer_slot($id);
-	    
-	    
-	    foreach($appointments as $appointment){
-	    	
-	    	$reciever = intval($appointment->userid);
-	    	
-		    organizer_send_message($USER,$reciever,$slot,'slotdeleted_notify:student');
-		    $notified_users++;
-	    }
-    }
-    
-    $DB->delete_records('event', array('id' => $eventid));
-    $DB->delete_records('organizer_slot_appointments', array('slotid'=>$id));
-    $DB->delete_records('organizer_slots', array('id' => $id));
-
-    return $notified_users;
+    return $deleted;
 }
 
 function organizer_add_to_queue(organizer_slot $slotobj, $groupid = 0) {
