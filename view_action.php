@@ -47,6 +47,7 @@ require_once(dirname(__FILE__) . '/locallib.php');
 // require_once(dirname(__FILE__) . '/view_action_form_delete.php');
 require_once(dirname(__FILE__) . '/view_action_form_comment.php');
 require_once(dirname(__FILE__) . '/view_action_form_print.php');
+require_once($CFG->dirroot . '/mod/organizer/classes/event/queue_added.php');
 // require_once(dirname(__FILE__) . '/view_action_form_remind_all.php');
 // require_once(dirname(__FILE__) . '/print.php');
 require_once(dirname(__FILE__) . '/view_lib.php');
@@ -106,7 +107,7 @@ if ($action == ORGANIZER_ACTION_REGISTER || $action == ORGANIZER_ACTION_QUEUE) {
 
     if ($success) {
     	if ($action == ORGANIZER_ACTION_QUEUE) {
-    		$event = \mod_organizer_event\queue_added::create(array(
+    		$event = \mod_organizer\event\queue_added::create(array(
     				'objectid' => $PAGE->cm->id,
     				'context' => $PAGE->context
 	    	));

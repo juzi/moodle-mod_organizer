@@ -450,22 +450,22 @@ function organizer_generate_table_content($columns, $params, $organizer, &$popup
         $numshown = 0;
         foreach ($slots as $slot) {
             $slotx = new organizer_slot($slot);
+            $alreadyinqueue = $slotx->is_user_in_queue($USER->id);
             if (!$slotx->is_available()) {
                 if ($params['mode'] != ORGANIZER_TAB_STUDENT_VIEW) {
-                	if (organizer_hasqueue($params['id'])) {
-                		$row = $rows[] = new html_table_row();
-                		$row->attributes['class'] = 'queueing';
-                	} else {
                         $row = $rows[] = new html_table_row();
                         $row->attributes['class'] = 'unavailable';
-                	}
                 } else {
                     continue; // slot isn't available yet
                 }
             } else {
-                $row = $rows[] = new html_table_row();
-                $row->attributes['class'] = '';
-
+				if ($organizer->queue && $alreadyinqueue) {
+                	$row = $rows[] = new html_table_row();
+           			$row->attributes['class'] = 'queueing';
+                } else {
+					$row = $rows[] = new html_table_row();
+               		$row->attributes['class'] = '';
+                }
             }
 
             $slotpastdue = $slotx->is_past_due();

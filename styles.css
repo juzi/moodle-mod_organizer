@@ -37,6 +37,9 @@
 #organizer_main_cointainer table tr.unavailable td {
     color: gray !important;
 }
+#organizer_main_cointainer table tr.queueing td {
+    background-color: LightYellow !important;
+}
 
 #organizer_main_cointainer table.overview {
     width: 100% !important;
