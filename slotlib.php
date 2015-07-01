@@ -136,6 +136,7 @@ class organizer_slot {
     private $slot;
     private $organizer;
     private $apps;
+    private $queue;
 
     public function __construct($slot, $lazy = true) {
         global $DB;
@@ -161,6 +162,9 @@ class organizer_slot {
         if (!$lazy) {
             $this->load_organizer();
             $this->load_appointments();
+            if ($this->organizer->queue) {
+            	$this->load_queue();
+            }
         }
     }
 
@@ -244,6 +248,53 @@ class organizer_slot {
         return true;
     }
 
+    /**
+     * Returns the position of a given user in this slot's queue starting at 1.
+     * Returns 0 if the user is not in the queue.
+     *
+     * @param int $userid The ID of the user.
+     */
+    public function is_user_in_queue($userid) {
+		$result = 0;
+
+		$this->load_organizer();
+		// The organizer should exists. Otherwise we are in a pathological state.
+		if ($this->organizer->queue) {
+			$this->load_queue();
+			// The queue might be empty though.
+			if ($this->queue) {
+				$position = 0;
+				foreach ($this->queue as $entry) {
+					$position++;
+					if ($entry->userid == $userid) {
+						$result = $position;
+						break;
+					}
+				}
+			}
+		}
+		return $result; 
+    }
+    
+    /**
+     * Returns the next entry of the waiting queue for this slot if the queue is not empty,
+     * null otherwise.
+     * 
+     * @return Ambigous <NULL, mixed>
+     */
+    public function get_next_in_queue() {
+    	$result = null;
+    	$this->load_organizer();
+    	
+    	if ($this->organizer->queue) {
+    		$this->load_queue();
+    		if ($this->queue) {
+    			$result = array_shift($this->queue);
+    		}
+    	}
+    	return $result;
+    }
+
     private function load_organizer() {
         global $DB;
         if (!$this->organizer) {
@@ -256,6 +307,14 @@ class organizer_slot {
         if (!$this->apps) {
             $this->apps = $DB->get_records('organizer_slot_appointments', array('slotid' => $this->slot->id));
         }
+    }
+    
+    private function load_queue() {
+    	global $DB;
+    	if (!$this->queue) {
+    		$this->queue = $DB->get_records('organizer_slot_queues', array('slotid' => $this->slot->id),
+    				'id ASC');
+    	}
     }
 }
 

@@ -769,7 +769,7 @@ function organizer_organizer_get_status_table_entries($params) {
     return $DB->get_records_sql($query, $par);
 }
 
-function organizer_organizer_generate_registration_table_content($columns, $params, $organizer, $context,&$popups) {
+function organizer_organizer_generate_registration_table_content($columns, $params, $organizer, $context, &$popups) {
     global $DB;
 
     $groupmode = organizer_is_group_mode();
@@ -855,7 +855,7 @@ function organizer_organizer_generate_registration_table_content($columns, $para
                         $list = '';
                         foreach ($members as $member) {
                             $list .= '<br />';
-                            $list .= organizer_reg_organizer_app_details($organizer, $member);
+                            $list .= organizer_reg_organizer_app_details($organizer, $member, $popups);
                         }
                         $cell = $row->cells[] = new html_table_cell($list);
                     } else {
@@ -1013,7 +1013,7 @@ function organizer_teacher_data($params, $slot,&$popups) {
     return $output;
 }
 
-function organizer_reg_organizer_app_details($organizer, $userid,&$popups) {
+function organizer_reg_organizer_app_details($organizer, $userid, &$popups) {
     $appointment = organizer_get_last_user_appointment($organizer, $userid, false);
     if ($appointment) {
         $list = '';
